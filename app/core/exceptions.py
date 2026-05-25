@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 
 class BusinessError(Exception):
+    """Base class for business logic errors."""
     status_code: int = HTTPStatus.BAD_REQUEST
     detail: str = "Business logic error"
 
