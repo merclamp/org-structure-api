@@ -10,10 +10,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class EmployeeBase(BaseModel):
-    """Fields shared by employee input and output schemas."""
-
-    # `str_strip_whitespace` trims surrounding spaces before validation,
-    # so a value of only whitespace becomes "" and fails `min_length`.
     model_config = ConfigDict(str_strip_whitespace=True)
 
     full_name: str = Field(min_length=1, max_length=200)
@@ -29,8 +25,6 @@ class EmployeeCreate(EmployeeBase):
 
 
 class EmployeeRead(EmployeeBase):
-    """Employee representation returned by the API."""
-
     model_config = ConfigDict(from_attributes=True)
 
     id: int

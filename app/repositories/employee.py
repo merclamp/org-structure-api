@@ -10,8 +10,6 @@ from app.repositories.base import BaseRepository
 
 
 class EmployeeRepository(BaseRepository):
-    """Database queries for employees."""
-
     async def create(
         self,
         *,
@@ -20,7 +18,6 @@ class EmployeeRepository(BaseRepository):
         position: str,
         hired_at: date | None,
     ) -> Employee:
-        """Insert a new employee and return it with its generated id."""
         employee = Employee(
             department_id=department_id,
             full_name=full_name,
@@ -35,12 +32,6 @@ class EmployeeRepository(BaseRepository):
         self,
         department_ids: Sequence[int],
     ) -> list[Employee]:
-        """Return all employees of the given departments.
-
-        Results are ordered by ``created_at`` (then ``id`` as a stable
-        tie-breaker). A single query covers a whole subtree of
-        departments; the service groups the rows by ``department_id``.
-        """
         if not department_ids:
             return []
         result = await self.session.execute(
@@ -55,10 +46,6 @@ class EmployeeRepository(BaseRepository):
         from_department_id: int,
         to_department_id: int,
     ) -> int:
-        """Move every employee from one department to another.
-
-        Returns the number of employees moved.
-        """
         result = await self.session.execute(
             update(Employee)
             .where(Employee.department_id == from_department_id)

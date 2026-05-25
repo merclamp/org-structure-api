@@ -1,5 +1,3 @@
-"""Department ORM model."""
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -14,17 +12,8 @@ if TYPE_CHECKING:
 
 
 class Department(TimestampMixin, Base):
-    """An organizational unit.
-
-    Departments form a tree: `parent_id` references another department,
-    or is ``NULL`` for a root unit.
-    """
-
     __tablename__ = "departments"
     __table_args__ = (
-        # Sibling departments must have unique names. `NULLS NOT DISTINCT`
-        # extends the rule to root departments, where parent_id IS NULL
-        # (PostgreSQL treats NULLs as equal for this constraint).
         UniqueConstraint(
             "parent_id",
             "name",
@@ -36,13 +25,10 @@ class Department(TimestampMixin, Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     parent_id: Mapped[int | None] = mapped_column(
-        # ON DELETE CASCADE lets PostgreSQL recursively remove a whole
-        # subtree in a single statement (used by the `cascade` delete mode).
         ForeignKey("departments.id", ondelete="CASCADE"),
         nullable=True,
     )
 
-    # --- Relationships ---------------------------------------------------
     parent: Mapped[Department | None] = relationship(
         "Department",
         remote_side="Department.id",
@@ -51,8 +37,6 @@ class Department(TimestampMixin, Base):
     children: Mapped[list[Department]] = relationship(
         "Department",
         back_populates="parent",
-        # passive_deletes lets the DB-level cascade do the work instead of
-        # SQLAlchemy loading and deleting every child in Python.
         cascade="all, delete-orphan",
         passive_deletes=True,
     )

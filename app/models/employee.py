@@ -1,5 +1,3 @@
-"""Employee ORM model."""
-
 from __future__ import annotations
 
 from datetime import date
@@ -15,14 +13,10 @@ if TYPE_CHECKING:
 
 
 class Employee(TimestampMixin, Base):
-    """A person working in a department."""
-
     __tablename__ = "employees"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     department_id: Mapped[int] = mapped_column(
-        # ON DELETE CASCADE: removing a department removes its employees
-        # (used by the `cascade` delete mode).
         ForeignKey("departments.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
@@ -30,8 +24,6 @@ class Employee(TimestampMixin, Base):
     full_name: Mapped[str] = mapped_column(String(200), nullable=False)
     position: Mapped[str] = mapped_column(String(200), nullable=False)
     hired_at: Mapped[date | None] = mapped_column(Date, nullable=True)
-
-    # --- Relationships ---------------------------------------------------
     department: Mapped[Department] = relationship(
         "Department",
         back_populates="employees",

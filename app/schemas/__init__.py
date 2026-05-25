@@ -1,5 +1,3 @@
-"""Pydantic schemas: request validation and response serialization."""
-
 from app.schemas.department import (
     DepartmentCreate,
     DepartmentRead,
