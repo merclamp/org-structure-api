@@ -96,3 +96,60 @@ class DepartmentRepository(BaseRepository):
     async def delete(self, department: Department) -> None:
         await self.session.delete(department)
         await self.session.flush()
+
+    async def would_create_cycle(
+        self,
+        department_id: int,
+        new_parent_id: int | None,
+    ) -> bool:
+        if new_parent_id is None:
+            return False  # Moving to root cannot create cycle
+        
+        if department_id == new_parent_id:
+            return True  # Cannot be parent of itself
+
+        cte = (
+            select(Department.id, Department.parent_id)
+            .where(Department.id == new_parent_id)
+            .cte(name="ancestors", recursive=True)
+        )
+        
+        recursive_part = select(Department.id, Department.parent_id).join(
+            cte, Department.id == cte.c.parent_id
+        )
+        cte = cte.union_all(recursive_part)
+        
+        # Check if department_id appears in ancestors of new_parent_id
+        result = await self.session.execute(
+            select(cte.c.id).where(cte.c.id == department_id)
+        )
+        return result.first() is not None
+
+    async def get_tree_with_depth(
+        self,
+        root_id: int,
+        depth: int,
+        current_level: int = 0,
+    ) -> Department | None:
+        if current_level > depth:
+            return None
+            
+        root = await self.get(root_id)
+        if not root:
+            return None
+            
+        if current_level < depth:
+            result = await self.session.execute(
+                select(Department)
+                .where(Department.parent_id == root_id)
+                .order_by(Department.created_at, Department.id)
+            )
+            children = list(result.scalars().all())
+            root.children_loaded = [  # type: ignore
+                await self.get_tree_with_depth(child.id, depth, current_level + 1)
+                for child in children
+            ]
+        else:
+            root.children_loaded = []  # type: ignore
+            
+        return root

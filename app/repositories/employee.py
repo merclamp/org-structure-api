@@ -51,4 +51,4 @@ class EmployeeRepository(BaseRepository):
             .where(Employee.department_id == from_department_id)
             .values(department_id=to_department_id)
         )
-        return result.rowcount
+        return result.rowcount  # type: ignore[attr-defined]
