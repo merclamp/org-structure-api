@@ -104,9 +104,9 @@ org-structure-api/
 │   └── test_api.py          # Интеграционные тесты
 ├── .env.example
 ├── alembic.ini
-├── docker-compose.yml       # Сервисы: api + db (postgres:16-alpine)
-├── Dockerfile               # python:3.11-slim
-├── docker-entrypoint.sh     # pg_isready → alembic upgrade head → uvicorn
+├── docker-compose.yml
+├── Dockerfile
+├── docker-entrypoint.sh
 └── requirements.txt
 ```
 
